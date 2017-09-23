@@ -162,7 +162,7 @@ void calculer_distances(int x, int y, int n, int villes[][n],float d[][n+1])
     }
 }
 
-void nouvelle_generation(int pop[][n], int scores[], int d[][n+1], int n, int n_pop)
+void nouvelle_generation(int n, int n_pop, int pop[][n], int scores[], int d[][n+1])
 {
     int ordre[n_pop];
     int i;
@@ -170,8 +170,8 @@ void nouvelle_generation(int pop[][n], int scores[], int d[][n+1], int n, int n_
     int min;
     int indice;
     int premier;
-    int pop_temp[n_pop][2];
-    int scores_temp[n_pop][2];
+    int pop_temp[n_pop][n];
+    int scores_temp[n_pop];
     for (i=0;i<n_pop;i++)
     {
         //trouvons l'indice de l'élément minimal de pop[1]
@@ -183,11 +183,11 @@ void nouvelle_generation(int pop[][n], int scores[], int d[][n+1], int n, int n_
                 {
                     min = scores[j];
                     premier = 0;
-                    indice = j
+                    indice = j;
                 }
                 else
                 {
-                    if scores[j]<min
+                    if (scores[j]<min)
                     {
                         min = scores[j];
                         indice = j;
@@ -199,11 +199,19 @@ void nouvelle_generation(int pop[][n], int scores[], int d[][n+1], int n, int n_
     }
     for (i = 0;i<n_pop;i++)
     {
-        for (j=0;j<2;j++)
+        for (j=0;j<n;j++)
         {
-            pop_temp[i][j] = pop[ordre[i][j]];
-            scores_temp[i][j] = scores[ordre[i][j]];
+            pop_temp[i][j] = pop[ordre[i]][j];
         }
+        scores_temp[i] = scores[ordre[i]];
+    }
+    for (i = 0;i<n_pop;i++)
+    {
+        for (j=0;j<n;j++)
+        {
+            pop[i][j] = pop_temp[i][j];
+        }
+        scores[i] = scores_temp[i];
     }
     //On trie les listes
     
@@ -218,10 +226,11 @@ int main(){
     int source_fichier =0;
     
     int n = 32;
-    int n_pop;
+    int n_pop = 500;
     int vmax = 25;
     int villes[n][2];
-    int population[];//chemins et scores
+    int chemins[500];
+    int scores[500];
     int x,y;//coordonnées de départ
     x = 0;
     y = 0;
@@ -229,8 +238,10 @@ int main(){
     srand(time(NULL));
     
     //on va remplir villes
-    if (source_fichier == 0):
-    generer_villes(n,vmax,villes);//on peut aussi les lire
+    if (source_fichier == 0)
+    {
+        generer_villes(n,vmax,villes);//on peut aussi les lire
+    }
     
     //afficher_ville(n,villes);
     return EXIT_SUCCESS;
