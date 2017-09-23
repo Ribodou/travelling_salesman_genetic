@@ -246,13 +246,3 @@ int main(){
     //afficher_ville(n,villes);
     return EXIT_SUCCESS;
 }
-
-/*
-generer_villes(n,vmax,villes);
-//
-matrice_distances = calculer_distances(villes);
-
-pop = creer_population(20, matrice_distances)
-
-t = algo_genetique(villes,500,1,10000)
-*/
