@@ -22,7 +22,7 @@
  
 //jupiter
 //open mandriva
-
+//Hi! this is a test.
 //Les includes:
 #include <stdio.h>
 #include <stdlib.h>
@@ -172,6 +172,12 @@ void nouvelle_generation(int n, int n_pop, int pop[][n], int scores[], int d[][n
     int premier;
     int pop_temp[n_pop][n];
     int scores_temp[n_pop];
+    //On trie les listes
+    
+    /* This part is pretty horrible. This is entirely my fault.
+     * I'm so sorry ... :(
+    */
+    
     for (i=0;i<n_pop;i++)
     {
         //trouvons l'indice de l'élément minimal de pop[1]
@@ -197,6 +203,13 @@ void nouvelle_generation(int n, int n_pop, int pop[][n], int scores[], int d[][n
         }
         ordre[i] = indice;
     }
+    
+    /* On remplit les listes temporaires pour ne pas perdre
+     * d'informations. C'est moche, mais ça marche!(*)
+     * 
+     * (*) On se rassure comme on peut...
+     */
+     
     for (i = 0;i<n_pop;i++)
     {
         for (j=0;j<n;j++)
@@ -213,7 +226,7 @@ void nouvelle_generation(int n, int n_pop, int pop[][n], int scores[], int d[][n
         }
         scores[i] = scores_temp[i];
     }
-    //On trie les listes
+    
     
     //On en supprie la moitiée
 }
