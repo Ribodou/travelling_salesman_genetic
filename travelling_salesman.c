@@ -20,9 +20,6 @@
  *par n points points de passage
  */
  
-//jupiter
-//open mandriva
-//Hi! this is a test.
 //Les includes:
 #include <stdio.h>
 #include <stdlib.h>
@@ -161,75 +158,73 @@ void calculer_distances(int x, int y, int n, int villes[][n],float d[][n+1])
         }
     }
 }
+// FIN
 
-void nouvelle_generation(int n, int n_pop, int pop[][n], int scores[], int d[][n+1])
+//THIS PART IS STILLE UNDER CONSTRUCTION
+void creer_population(int n, int n_pop, float d[][n], int population[][n])
 {
-    int ordre[n_pop];
-    int i;
-    int j;
-    int min;
-    int indice;
-    int premier;
-    int pop_temp[n_pop][n];
-    int scores_temp[n_pop];
-    //On trie les listes
     
-    /* This part is pretty horrible. This is entirely my fault.
-     * I'm so sorry ... :(
-    */
-    
-    for (i=0;i<n_pop;i++)
-    {
-        //trouvons l'indice de l'élément minimal de pop[1]
-        for (j=0;j<n_pop;j++)
-        {
-            if ( (est_dedans(min, n_pop, ordre))==0 )
-            {
-                if (premier)
-                {
-                    min = scores[j];
-                    premier = 0;
-                    indice = j;
-                }
-                else
-                {
-                    if (scores[j]<min)
-                    {
-                        min = scores[j];
-                        indice = j;
-                    }
-                }
-            }
-        }
-        ordre[i] = indice;
-    }
-    
-    /* On remplit les listes temporaires pour ne pas perdre
-     * d'informations. C'est moche, mais ça marche!(*)
-     * 
-     * (*) On se rassure comme on peut...
-     */
-     
-    for (i = 0;i<n_pop;i++)
-    {
-        for (j=0;j<n;j++)
-        {
-            pop_temp[i][j] = pop[ordre[i]][j];
-        }
-        scores_temp[i] = scores[ordre[i]];
-    }
-    for (i = 0;i<n_pop;i++)
-    {
-        for (j=0;j<n;j++)
-        {
-            pop[i][j] = pop_temp[i][j];
-        }
-        scores[i] = scores_temp[i];
-    }
-    
-    
-    //On en supprie la moitiée
 }
+/*code python a passer en c
+ def creer_population(m,d):
+    population = []
+    k = len(d)-1#nombre de points
+    L = [i for i in range(k)]#liste des points
+    for i in range(m):
+        N = L[:]
+        chemin = []
+        while len(N) > 0:
+            j = rd.randint(0,len(N)-1)
+            chemin.append(N.pop(j))
+        population.append((chemin, longueur_chemin(chemin,d)))
+    return population
+*/
+
+
+void interclassement(int i, int j, int k, float T[])
+{
+    int r;
+    float S[k-i];
+    for (r = i; r < k; r++)
+    {
+        S[r] = T[r];
+    }
+    for (r=k+1; r<j;r++)
+    {
+        S[r] = T[j-r+k+1];
+    }
+    int d = i;
+    int f = j;
+    int s;
+    for (s=i;s<j;s++)//PB?
+    {
+        if (S[d] < S[f])
+        {
+            T[s] = S[d];
+            d++;
+        }
+        else
+        {
+            T[s] = S[f];
+            f--;
+        }
+    }
+}
+        
+void tri_fusion(int i, int j, float liste[])
+{
+    int k;
+    if (i<j)
+    {
+        k = floor((i*1.0+j*1.0)/2);
+        tri_fusion(i,k,liste);
+        tri_fusion(k+1,j,liste);
+        interclassement(i,j,k,liste);
+    }
+}
+
+
+
 
 
 //corps du programme principal
@@ -238,6 +233,7 @@ int main(){
     // MODIFY THIS LINE IF YOU YOU WANT TO USE A FILE
     int source_fichier =0;
     
+    //definitions des paramètres
     int n = 32;
     int n_pop = 500;
     int vmax = 25;
@@ -245,8 +241,10 @@ int main(){
     int chemins[500];
     int scores[500];
     int x,y;//coordonnées de départ
+    
     x = 0;
     y = 0;
+    
     //aléatoire
     srand(time(NULL));
     
@@ -255,7 +253,27 @@ int main(){
     {
         generer_villes(n,vmax,villes);//on peut aussi les lire
     }
-    
     //afficher_ville(n,villes);
+    
+    //test de l'algorithme de tris
+    float l[100];
+    
+    for (x = 0;x<100;x++)
+    {
+        l[x] = rand()*1.0;
+    }
+    
+    // on sépare l'affichage
+    for (x=0;x<5;x++)
+    {
+        printf("\n");
+    }
+    
+    //on trie et on affiche le résultat
+    tri_fusion(0,100,l);
+    for (x = 0;x<100;x++)
+    {
+        printf("%f\n",l[x]);
+    }
     return EXIT_SUCCESS;
 }
