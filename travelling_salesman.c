@@ -181,22 +181,22 @@ void creer_population(int n, int n_pop, float d[][n], int population[][n])
 */
 
 
-void interclassement(int i, int j, int k, float T[])
+void interclassement(int i, int j, int k, float T[])//seg fault
 {
     int r;
-    float S[k-i];
+    float S[j-i];
     for (r = i; r < k; r++)
     {
         S[r] = T[r];
     }
-    for (r=k+1; r<j;r++)
+    for (r=k; r<j;r++)
     {
-        S[r] = T[j-r+k+1];
+        S[r] = T[j-r-k+1];//S[r] = T[j-r+k+1];
     }
     int d = i;
     int f = j;
     int s;
-    for (s=i;s<j;s++)//PB?
+    for (s=i;s<j;s++)
     {
         if (S[d] < S[f])
         {
@@ -223,8 +223,19 @@ void tri_fusion(int i, int j, float liste[])
     }
 }
 
-
-
+int est_triee(float liste[],int n)
+{
+    int e=0;
+    int i;
+    for (i=1;i<n;i++)
+    {
+        if (liste[i]<liste[i-1])
+        {
+            e = 1;
+        }
+    }
+    return e;
+}
 
 
 //corps du programme principal
@@ -253,27 +264,25 @@ int main(){
     {
         generer_villes(n,vmax,villes);//on peut aussi les lire
     }
-    //afficher_ville(n,villes);
+    afficher_ville(n,villes);
     
-    //test de l'algorithme de tris
-    float l[100];
-    
-    for (x = 0;x<100;x++)
+    //test tri_fusion
+    int erreur = 0;
+    int l[500];
+    int k;
+    for (k=0;k<100;k++)
     {
-        l[x] = rand()*1.0;
-    }
-    
-    // on sépare l'affichage
-    for (x=0;x<5;x++)
-    {
-        printf("\n");
-    }
-    
-    //on trie et on affiche le résultat
-    tri_fusion(0,100,l);
-    for (x = 0;x<100;x++)
-    {
-        printf("%f\n",l[x]);
+        int m;
+        for (m=0;m<500;m++)
+        {
+            l[m] = rand()*1.0;
+            interclassement(0,500,250,l);
+            if ( est_triee(l,500) == 0 )
+            {
+                erreur = 1;
+            }
+        }
+        printf("%d\n",erreur);
     }
     return EXIT_SUCCESS;
 }
