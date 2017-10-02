@@ -185,27 +185,27 @@ void interclassement(int i, int j, int k, float T[])//seg fault
 {
     int r;
     float S[j-i];
-    for (r = i; r < k; r++)
+    for (r = i; r <= k; r++)
     {
-        S[r] = T[r];
+        S[r-i] = T[r];
     }
     for (r=k; r<j;r++)
     {
-        S[r] = T[j-r-k+1];//S[r] = T[j-r+k+1];
+        S[r-i] = T[j-r-k-1];//S[r] = T[j-r+k+1];
     }
     int d = i;
     int f = j;
     int s;
     for (s=i;s<j;s++)
     {
-        if (S[d] < S[f])
+        if (S[d-i] < S[f-i-1])
         {
-            T[s] = S[d];
+            T[s] = S[d-i];
             d++;
         }
         else
         {
-            T[s] = S[f];
+            T[s] = S[f-i-1];
             f--;
         }
     }
@@ -214,27 +214,13 @@ void interclassement(int i, int j, int k, float T[])//seg fault
 void tri_fusion(int i, int j, float liste[])
 {
     int k;
-    if (i<j)
+    if (i<j-1)
     {
         k = floor((i*1.0+j*1.0)/2);
         tri_fusion(i,k,liste);
         tri_fusion(k+1,j,liste);
         interclassement(i,j,k,liste);
     }
-}
-
-int est_triee(float liste[],int n)
-{
-    int e=0;
-    int i;
-    for (i=1;i<n;i++)
-    {
-        if (liste[i]<liste[i-1])
-        {
-            e = 1;
-        }
-    }
-    return e;
 }
 
 
@@ -266,23 +252,6 @@ int main(){
     }
     afficher_ville(n,villes);
     
-    //test tri_fusion
-    int erreur = 0;
-    int l[500];
-    int k;
-    for (k=0;k<100;k++)
-    {
-        int m;
-        for (m=0;m<500;m++)
-        {
-            l[m] = rand()*1.0;
-            interclassement(0,500,250,l);
-            if ( est_triee(l,500) == 0 )
-            {
-                erreur = 1;
-            }
-        }
-        printf("%d\n",erreur);
-    }
+    
     return EXIT_SUCCESS;
 }
