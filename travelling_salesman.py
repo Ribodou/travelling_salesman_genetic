@@ -22,6 +22,8 @@
 #determiner, par un algorithme genetique, le meilleur moyen de passer
 #par n points points de passage
 
+
+
 # ----- import des modules necessaires ---------------------------------
 import matplotlib.pyplot as plt
 import numpy as np
@@ -31,9 +33,9 @@ from itertools import permutations
 # ----- definition des fonctions ---------------------------------------
 def generer_villes(n, vmax) :
     """
-        Return an array that contain list like [x,y] where x and y are 
+        Return an array that contain list like [x,y] where x and y are
         the coordinates of one city.
-    
+
         :param a: Number of cities.
         :param b: The maximum each coordinate can take.
         :type a: integer
@@ -129,12 +131,10 @@ def reduire(p):
         p.pop(0)
     for e in arg[:len(arg)//2]:
         p.append(p_tri[e])
-        
 
 def muter_chemin(c):
     i,j = rd.randint(0,len(c)-1), rd.randint(0,len(c)-1)
     c[i], c[j] = c[j], c[i]
-
 
 def muter_population(p,proba,d):
     for i in range(5,len(p)):
@@ -171,19 +171,18 @@ def algo_genetique(villes,m,proba,g):
     wframe = ax.plot(l,c = 'b')
     for i in range(g):
         generation += 1
-        
-        #équipe bleue
+
         reduire(pop)
         nouvelle_generation(pop,matrice_distances)
         muter_population(pop,0.3,matrice_distances)
-        
+
         l = []
         for e in pop:
             l.append(e[1])
         ax = plt.gca()
         l.sort()
         wframe = ax.plot(l,c = 'b')
-        
+
         plt.draw()
         plt.pause(0.001)
         liste = wframe.pop(0)
@@ -195,7 +194,7 @@ def algo_genetique(villes,m,proba,g):
 
 # ----- corps du programme principal -----------------------------------
 
-n = 32
+n = 32#nombre de villes
 villes = generer_villes(n,25)
 matrice_distances = calculer_distances(villes)
 pop = creer_population(20, matrice_distances)
