@@ -58,7 +58,7 @@ int main()
     {
 
     }*/
-v= creer_villes(n, vmax);//on peut aussi les lire
+    v= creer_villes(n, vmax);//on peut aussi les lire
     /* Pour commencer, un bel affichage */
     printf("\n\n\n------------------------\n-- debut du programme --\n------------------------\n\n");
 
@@ -66,7 +66,7 @@ v= creer_villes(n, vmax);//on peut aussi les lire
     //afficher_ville(n,villes);
     calculer_distances(x, y, n, v, d);
     population *pop = creer_population(n, n_pop, d);
-
+    tri_fusion(pop);
     // libéré, délivré...
     for (i=0;i<n;i++)
     {
@@ -247,4 +247,62 @@ individu *creer_individu(int n, double ** d)
     }
     ind->score = calculer_score(ind, d);
     return ind;
+}
+
+population *append(population *pop, individu* ind)
+{
+    if (pop->taille == 0)
+    {
+        pop->tete = ind;
+        return pop;
+    }
+    else
+    {
+        individu *parcours = pop->tete;
+        while (parcours->suivant != NULL)
+        {
+            parcours = parcours->suivant;
+        }
+        parcours->suivant = ind;
+        return pop;
+    }
+}
+
+population *quicksort(population *pop)
+{
+    if (pop->taille == 0)
+    {
+        return pop;
+    }
+    else
+    {
+        individu *pivot = pop->tete;
+
+        //creation de deux population vides
+        population *p1 = malloc(sizeof(population));
+        p1->taille = 0;
+        population p2 = malloc(sizeof(population));
+        p2->taille = 0;
+
+        individu *parcours = pop->tete;
+
+        while (parcours->suivant != NULL)
+        {
+            parcours = parcours->suivant;
+            if (parcours->scores < pivot->scores)
+            {
+                append(p1, parcours);
+            }
+            else
+            {
+                append(p2, parcours);
+            }
+        }
+        pop = ajout(p1, pivot, p2);
+
+        free(p1);
+        free(p2);
+
+        return pop;
+    }
 }

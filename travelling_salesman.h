@@ -84,5 +84,7 @@ double calculer_score(individu *ind, double **d);
 //creer un nouvel individu
 individu *creer_individu(int n, double ** d);
 
+//tri la population selon le score par un tri fusion
+void tri_fusion(population *pop);
 
 #endif
