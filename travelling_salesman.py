@@ -18,17 +18,13 @@
 # PS: For any question or any suggestion, please contact me at:
 #luc.robidou@gmail.com
 
-# but du programme:
-#determiner, par un algorithme genetique, le meilleur moyen de passer
-#par n points points de passage
+# objectif: faire des OGM
 
-# ----- import des modules necessaires ---------------------------------
-import matplotlib.pyplot as plt
-import numpy as np
 import random as rd
-from itertools import permutations
+import numpy as np
+import matplotlib.pyplot as plt
+import time
 
-# ----- definition des fonctions ---------------------------------------
 def generer_villes(n, vmax) :
     """
         Return an array that contain list like [x,y] where x and y are 
@@ -49,155 +45,123 @@ def generer_villes(n, vmax) :
             villes.append([x,y])
     return np.array(villes)
 
-def ville_origine() :
-    """
-    but: generer une position initiale
-    entree: rien
-    sortie: tuple
-    """
-    return 0,0
 
-def normaliser_chemin(chemin, n) :
-    """
-    but: creer un chemin valide de taille n
-    entree: liste, entier
-    sortie: liste
-    """
-    normal = []
-    for elem in chemin :
-        if 0 <= elem <n and elem not in normal :
-            normal.append(elem)
-    # on complete
-    for k in range(n) :
-        if k not in normal :
-            normal.append(k)
-    return normal
-
-def distance(pts,i,j) :
-    """
-    but: caluler la distance entre deux points
-    entree: liste, entier, entier
-    sortie: entier
-    """
+def distance(pts, i, j) :
+    """Calcule la distance entre deux points."""
     return np.sqrt( (pts[i][0]-pts[j][0])**2 + (pts[i][1]-pts[j][1])**2 )
 
-def longueur_chemin(chemin, d) :
-    """
-    but: calculer la longueur d'un chemin
-    entree: liste, liste de liste
-    sortie: entier
-    """
-    n = len(chemin)
-    s =matrice_distances[n][chemin[0]]
-    for k in range(n-1) :
-        s +=matrice_distances[chemin[k]][chemin[k+1]]
-    return s
 
-def calculer_distances(villes) :
-    """
-    but: calculer la matrice representant les distances de villes
-    entree: liste
-    sortie: liste de liste
-    """
+def calculer_distances(villes, origine) :
+    """Calcule la matrice representant les distances entre les villes"""
     n = len(villes)
-    pts = [[villes[i][j] for j in range(2)] for i in range(n)]
-    x,y = ville_origine()
-    pts.append([x,y])
+    pts = [[villes[i][j] for j in range(2)] for i in range(n)] + [origine]
     return [[distance(pts,i,j) for j in range(n+1)] for i in range(n+1)]
 
-def creer_population(m,d):
-    population = []
-    k = len(d)-1#nombre de points
-    L = [i for i in range(k)]#liste des points
-    for i in range(m):
-        N = L[:]
-        chemin = []
-        while len(N) > 0:
-            j = rd.randint(0,len(N)-1)
-            chemin.append(N.pop(j))
-        population.append((chemin, longueur_chemin(chemin,d)))
-    return population
 
-def reduire(p):
-    ordre = []
-    for e in p:
-        ordre.append(e[1])
-    arg = np.array(ordre).argsort()
-    p_tri = p[:]
-    #on "vide" p
-    for i in range(len(p)):
-        p.pop(0)
-    for e in arg[:len(arg)//2]:
-        p.append(p_tri[e])
-        
+class Individus:
 
-def muter_chemin(c):
-    i,j = rd.randint(0,len(c)-1), rd.randint(0,len(c)-1)
-    c[i], c[j] = c[j], c[i]
+    global M
+    
+    def __init__(self, genes = None):
+        if genes == None:
+            self.genes = []
+            self.genes = list(range(len(M) - 1))
+            rd.shuffle(self.genes)
+        else:
+            self.genes = genes
+        self.calculer_score()
+
+    def calculer_score(self):
+        score = M[-1][self.genes[0]]
+        score += sum([M[self.genes[k]][self.genes[k+1]]
+            for k in range( len(self.genes) - 1) ])
+        self.score = score
+    
+    def normaliser(self):
+        nouveaux_genes = []
+        for gene in self.genes:
+            if 0 <= gene < len(M)-1 and gene not in nouveaux_genes:
+                nouveaux_genes.append(gene)
+        # il peut en manquer (si le test échoue)
+        # complétons donc
+        for i in range(len(M)-1):
+            if i not in nouveaux_genes:
+                nouveaux_genes.append(i)
+        self.genes = nouveaux_genes
+    
+    def muter(self):
+        i = rd.randint(0, len(self.genes) - 1)
+        j = rd.randint(0, len(self.genes) - 1)
+        self.genes[i], self.genes[j] = self.genes[j], self.genes[i]
+        self.calculer_score()
+    
+    def croiser(self, other):
+        moitiee = len(self.genes) // 2
+        genes_bebe = [self.genes[i] for i in range(moitiee)]
+        for i in range(moitiee, len(other.genes)):
+            genes_bebe.append(other.genes[i])
+        bebe = Individus(genes_bebe)
+        bebe.normaliser()
+        return bebe
+
+    
+class Population:
+
+    def __init__(self, nombre_individus):
+        self.individus = []
+        self.taille = nombre_individus
+        for _ in range(nombre_individus):
+            self.individus.append(Individus())
+    
+    def decimer(self, fraction):
+        self.individus.sort(key=lambda individu: individu.score)
+        while len(self.individus) > fraction / 100 * self.taille:
+            self.individus.pop(-1)
+    
+    def muter(self, probabilite):
+        self.individus.sort(key=lambda individu: individu.score)
+        for i in range(5, len(self.individus)):
+            if rd.random() < probabilite:
+                self.individus[i].muter()
+    
+    def renouveler(self):
+        taille = len(self.individus)
+        for i in range(-1, taille):
+            self.individus.append(self.individus[i].croiser(self.individus[i+1]))
 
 
-def muter_population(p,proba,d):
-    for i in range(5,len(p)):
-        if rd.random()<proba:
-            muter_chemin(p[i][0])
-            p[i] = p[i][0],longueur_chemin(p[i][0],d)
-
-def croiser(c1, c2):
-    c = []
-    for i in range(len(c1)//2):
-        c.append(c1[i])
-    for i in range(len(c2)//2,len(c2)):
-        c.append(c2[i])
-    c = normaliser_chemin(c,n)
-    return c
-
-def nouvelle_generation(p,d):
-    for i in range(-1,len(p)):
-        croisement = croiser(p[i][0],p[i+1][0])
-        p.append((croisement,longueur_chemin(croisement,d)))
-
-def algo_genetique(villes,m,proba,g):
-    pop = creer_population(m,matrice_distances)
-    plt.ion()
-    generation = 0
-    l = []
-    for e in pop:
-        l.append(e[1])
-    l.sort()
-    plt.ylabel('lengh of paths')
-    plt.xlabel('<--- faster              paths            longer ----->')
-    plt.title("Travelling salesman genetic")
-    ax = plt.gca()
-    wframe = ax.plot(l,c = 'b')
-    for i in range(g):
-        generation += 1
-        
-        #équipe bleue
-        reduire(pop)
-        nouvelle_generation(pop,matrice_distances)
-        muter_population(pop,0.3,matrice_distances)
-        
-        l = []
-        for e in pop:
-            l.append(e[1])
+class Afficheur:
+    def __init__(self, liste):
+        plt.ion()
+        plt.ylabel('lengh of paths')
+        plt.xlabel('<--- faster              paths            longer ----->')
+        plt.title("Travelling salesman genetic")
         ax = plt.gca()
-        l.sort()
-        wframe = ax.plot(l,c = 'b')
-        
+        ax.plot(liste, color='b', label="Génération n°0")
+        plt.legend()
         plt.draw()
         plt.pause(0.001)
-        liste = wframe.pop(0)
-        liste.remove()
-        del liste
-    return l
+        print("afficher")
+    
+    def afficher(self, liste, numero_de_frame):
+        ax = plt.gca()
+        wframe = ax.plot(liste, color='g', label="Génération n°{}".format(numero_de_frame))
+        plt.legend()
+        plt.draw()
+        plt.pause(0.001)
+        frame = wframe.pop(0)
+        frame.remove()
 
 
-
-# ----- corps du programme principal -----------------------------------
-
-n = 32
-villes = generer_villes(n,25)
-matrice_distances = calculer_distances(villes)
-pop = creer_population(20, matrice_distances)
-
-t = algo_genetique(villes,500,1,10000)
+if __name__ == "__main__":
+    origine = 0, 0
+    M = calculer_distances(generer_villes(30, 25), origine)
+    pop = Population(500)
+    liste_score = sorted([individu.score for individu in pop.individus])
+    afficheur = Afficheur(liste_score)
+    for i in range(10000):
+        pop.decimer(50)
+        pop.renouveler()
+        pop.muter(0.3)
+        liste_score = sorted([individu.score for individu in pop.individus])
+        afficheur.afficher(liste_score, i+1)
