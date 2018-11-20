@@ -63,6 +63,11 @@ class Individus:
     global M
     
     def __init__(self, genes = None):
+        """
+            Initialise un nouvel individu en lui attribuant les gênes passés en
+            paramètres.
+            Si aucun génome n'est passé, on en crée un aléatoire.
+        """
         if genes == None:
             self.genes = []
             self.genes = list(range(len(M) - 1))
@@ -72,12 +77,23 @@ class Individus:
         self.calculer_score()
 
     def calculer_score(self):
+        """
+            Renvoie le "score" d'un individu, c'est-à-dire l'efficacité avec
+            laquelle il résout le problème.
+            Ici, le score est la distance parcourue lors du parcour de toutes
+            les villes dans l'ordre spécifié dans le génome de l'individu.
+        """
         score = M[-1][self.genes[0]]
         score += sum([M[self.genes[k]][self.genes[k+1]]
             for k in range( len(self.genes) - 1) ])
         self.score = score
     
     def normaliser(self):
+        """
+            Permet de normaliser le génome d'un individu. S'il ne passe pas par
+            toutes les villes, il faut corriger la situation.
+            On veut des bébés mutants, mais pas tros monstrueux non plus.
+        """
         nouveaux_genes = []
         for gene in self.genes:
             if 0 <= gene < len(M)-1 and gene not in nouveaux_genes:
@@ -90,12 +106,21 @@ class Individus:
         self.genes = nouveaux_genes
     
     def muter(self):
+        """
+            Permet de faire muter un individu (ici, en échangeant l'ordre de
+            passage de deux villes).
+        """
         i = rd.randint(0, len(self.genes) - 1)
         j = rd.randint(0, len(self.genes) - 1)
         self.genes[i], self.genes[j] = self.genes[j], self.genes[i]
         self.calculer_score()
     
     def croiser(self, other):
+        """
+            Fait se reproduire l'individu avec un autre dans l'espoir que son
+            génôme lui permettra d'être un meilleur vendeur de carpette.
+            Aldous Huxley searit fier de nous !
+        """
         moitiee = len(self.genes) // 2
         genes_bebe = [self.genes[i] for i in range(moitiee)]
         for i in range(moitiee, len(other.genes)):
@@ -133,9 +158,9 @@ class Population:
 class Afficheur:
     def __init__(self, liste):
         plt.ion()
-        plt.ylabel('lengh of paths')
-        plt.xlabel('<--- faster              paths            longer ----->')
-        plt.title("Travelling salesman genetic")
+        plt.ylabel('length of path')
+        plt.xlabel('<--- faster              path            longer ----->')
+        plt.title("Genetically modified travelling salesman")
         ax = plt.gca()
         ax.plot(liste, color='b', label="Génération n°0")
         plt.legend()
